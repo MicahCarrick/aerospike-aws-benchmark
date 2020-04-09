@@ -1,0 +1,85 @@
+service {
+    cluster-name aws-benchmark
+{% for item in groups['server_instance'] %}
+{% if item == inventory_hostname %}
+    node-id a{{ loop.index }}
+{% endif %}
+{% endfor %}
+}
+
+logging {
+    console {
+{% for logging in logging_contexts %}
+        context {{ logging.context }} {{ logging.level }}
+{% endfor %}
+    }
+}
+
+network {
+    tls {{ tls_name}} {
+        ca-file {{ ca_file }}
+        cert-file {{ cert_file }}
+        key-file {{ key_file }}
+
+        cipher-suite {{ cipher_suite }}
+    }
+
+    service {
+        address {{ hostvars[inventory_hostname].ansible_default_ipv4.address }}
+
+        # non-TLS port for baseline
+        port 3000
+
+{% if service_tls %}
+        tls-port 4000
+        tls-address {{ hostvars[inventory_hostname].ansible_default_ipv4.address }}
+        tls-name {{ tls_name}}
+
+        tls-authenticate-client {{ tls_authenticate_client }}
+{% endif %}
+    }
+
+    heartbeat {
+        mode mesh
+{% if heartbeat_tls %}
+        tls-port 4002
+        tls-name {{ tls_name}}
+{% for item in groups['server_instance'] %}
+{% if item != inventory_hostname %}
+        tls-mesh-seed-address-port {{ hostvars[item].ansible_default_ipv4.address }} 4002
+{% endif %}
+{% endfor %}
+{% else %}
+        port 3002
+{% for item in groups['server_instance'] %}
+{% if item != inventory_hostname %}
+        mesh-seed-address-port {{ hostvars[item].ansible_default_ipv4.address }} 3002
+{% endif %}
+{% endfor %}
+{% endif %}
+    }
+
+    fabric {
+        address {{ hostvars[inventory_hostname].ansible_default_ipv4.address }}
+{% if fabric_tls %}
+        tls-port 4001
+        tls-name {{ tls_name}}
+{% else %}
+        port 3001
+{% endif %}
+    }
+}
+
+namespace {{ namespace}} {
+    replication-factor {{ replication_factor }}
+    memory-size {{ memory_size }}
+
+{% if storage_engine == 'device' %}
+    storage-engine {{ storage_engine }} {
+        device {{ device }}
+        write-block-size {{ write_block_size }}
+    }
+{% else %}
+    storage-engine {{ storage_engine }}
+{% endif %}
+}

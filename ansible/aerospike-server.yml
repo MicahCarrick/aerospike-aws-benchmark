@@ -1,0 +1,92 @@
+---
+- hosts: server_instance
+  remote_user: ec2-user
+  vars:
+    service_tls: false
+    fabric_tls: false
+    heartbeat_tls: false
+    tls_name: aerospike.server
+    tls_authenticate_client: aerospike.client
+    ca_file: /etc/pki/tls/certs/aerospike.ca.crt
+    cert_file: /etc/pki/tls/certs/aerospike.server_RSA.crt
+    key_file: /etc/pki/tls/private/aerospike.server_RSA.key
+    cipher_suite: ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-GCM-SHA256
+    namespace: test
+    replication_factor: 2
+    storage_engine: memory
+    memory_size: 2G
+    device: /dev/nvme1n1
+    write_block_size: 128K
+    logging_contexts:
+      - context: any
+        level: info
+      - context: tls
+        level: debug
+      - context: socket
+        level: info
+  tasks:
+  - name: upload CA certificate
+    become: yes
+    copy:
+      src: files/aerospike.ca.crt
+      dest: /etc/pki/tls/certs/aerospike.ca.crt
+      mode: '0644'
+    tags:
+      - tls
+  - name: upload RSA server certificate
+    become: yes
+    copy:
+      src: files/aerospike.server_RSA.crt
+      dest: /etc/pki/tls/certs/aerospike.server_RSA.crt
+      mode: '0644'
+    tags:
+      - tls
+  - name: upload RSA server private key
+    become: yes
+    copy:
+      src: files/aerospike.server_RSA.key
+      dest: /etc/pki/tls/private/aerospike.server_RSA.key
+      mode: '0644'
+    tags:
+      - tls
+  - name: upload ECDSA server certificate
+    become: yes
+    copy:
+      src: files/aerospike.server_ECDSA.crt
+      dest: /etc/pki/tls/certs/aerospike.server_ECDSA.crt
+      mode: '0644'
+    tags:
+      - tls
+  - name: upload ECDSA server private key
+    become: yes
+    copy:
+      src: files/aerospike.server_ECDSA.key
+      dest: /etc/pki/tls/private/aerospike.server_ECDSA.key
+      mode: '0644'
+    tags:
+      - tls
+  - name: upload feture key
+    become: yes
+    copy:
+      src: files/features.conf
+      dest: /etc/aerospike/features.conf
+      mode: '0644'
+    tags:
+      - config
+  - name: upload aerospike config
+    become: yes
+    template:
+      src: templates/aerospike.conf.j2
+      dest: /etc/aerospike/aerospike.conf
+      mode: '0644'
+    tags:
+      - config
+  - name: start aerospike service if not started
+    become: yes
+    service:
+      name: aerospike
+      state: restarted
+  - name: show configuration template output
+    debug: msg={{ lookup('template', 'aerospike.conf.j2', convert_data=False).split('\n') }}
+    tags:
+      - config

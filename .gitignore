@@ -1,0 +1,7 @@
+terraform/*.tfstate*
+terraform/.terraform*
+
+ansible/files/features.conf
+ansible/files/*.key
+ansible/files/*.crt
+ansible/files/*.p12

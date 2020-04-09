@@ -1,0 +1,70 @@
+---
+- hosts: client_instance
+  remote_user: ec2-user
+  tasks:
+  - name: upload CA certificate
+    become: yes
+    copy:
+      src: files/aerospike.ca.crt
+      dest: /etc/pki/tls/certs/aerospike.ca.crt
+      mode: '0644'
+  - name: upload RSA client certificate
+    become: yes
+    copy:
+      src: files/aerospike.client_RSA.chain.p12
+      dest: /etc/pki/tls/private/aerospike.client_RSA.chain.p12
+      mode: '0644'
+  - name: upload ECDSA client certificate
+    become: yes
+    copy:
+      src: files/aerospike.client_ECDSA.chain.p12
+      dest: /etc/pki/tls/private/aerospike.client_ECDSA.chain.p12
+      mode: '0644'
+  - name: remove old CA certificate Java TrustStore
+    become: yes
+    file:
+      path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.ca.jks
+      state: absent
+  - name: add CA certificate to Java TrustStore
+    become: yes
+    java_cert:
+      cert_path: /etc/pki/tls/certs/aerospike.ca.crt
+      cert_alias: aerospike.ca
+      keystore_path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.ca.jks
+      keystore_pass: changeit
+      keystore_create: yes
+      state: present
+  - name: remove old RSA client certificate Java KeyStore
+    become: yes
+    file:
+      path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.client_RSA.jks
+      state: absent
+  - name: add RSA client certificate to Java KeyStore
+    become: yes
+    java_cert:
+      pkcs12_path: /etc/pki/tls/private/aerospike.client_RSA.chain.p12
+      pkcs12_alias: aerospike.client
+      pkcs12_password: changeit
+      cert_alias: aerospike.client
+      keystore_path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.client_RSA.jks
+      keystore_pass: changeit
+      keystore_create: yes
+      state: present
+  - name: remove ECDSA client certificate Java KeyStore
+    become: yes
+    file:
+      path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.client_ECDSA.jks
+      state: absent
+  - name: add ECDSA client certificate to Java KeyStore
+    become: yes
+    java_cert:
+      pkcs12_path: /etc/pki/tls/private/aerospike.client_ECDSA.chain.p12
+      pkcs12_alias: aerospike.client
+      pkcs12_password: changeit
+      cert_alias: aerospike.client
+      keystore_path: /home/ec2-user/aerospike-client-java/benchmarks/aerospike.client_ECDSA.jks
+      keystore_pass: changeit
+      keystore_create: yes
+      state: present
+
+

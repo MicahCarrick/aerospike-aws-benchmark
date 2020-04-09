@@ -1,0 +1,102 @@
+{
+    "variables": {
+        "region": "us-west-2",
+        "server_version": null,
+        "client_version": null,
+        "tools_version": "latest"
+    },
+    "builders": [
+        {
+            "name": "aerospike-server",
+            "type": "amazon-ebs",
+            "region": "{{user `region`}}",
+            "ami_groups": "all",
+            "source_ami_filter": {
+                "filters": {
+                "virtualization-type": "hvm",
+                "name": "amzn2-ami-hvm-*-x86_64-gp2",
+                "root-device-type": "ebs"
+                },
+                "owners": ["137112412989"],
+                "most_recent": true
+            },
+            "instance_type": "t2.small",
+            "ssh_username": "ec2-user",
+            "ami_name": "aerospike-benchmark-server-{{user `server_version`}}-{{ timestamp }}",
+            "ami_description": "Aerospike Server Enterprise {{user `server_version`}}"
+        },
+        {
+            "name": "benchmark-client",
+            "type": "amazon-ebs",
+            "region": "{{user `region`}}",
+            "ami_groups": "all",
+            "source_ami_filter": {
+                "filters": {
+                "virtualization-type": "hvm",
+                "name": "amzn2-ami-hvm-*-x86_64-gp2",
+                "root-device-type": "ebs"
+                },
+                "owners": ["137112412989"],
+                "most_recent": true
+            },
+            "instance_type": "t2.small",
+            "ssh_username": "ec2-user",
+            "ami_name": "aerospike-benchmark-client-{{user `client_version`}}-{{ timestamp }}",
+            "ami_description": "Aerospike Java Client {{user `client_version`}}"
+        }
+    ],
+    "provisioners": [
+        {
+            "pause_before": "15s",
+            "type": "shell",
+            "inline": [
+                "echo 'Updating system'",
+                "sudo yum update -y"
+            ]
+        },
+        {
+            "type": "shell",
+            "inline": [
+                "echo 'Rebooting instance...'",
+                "sudo reboot"
+            ],
+            "expect_disconnect": true,
+            "pause_after": "15s"
+        },
+        {
+            
+            "only": ["aerospike-server"],
+            "type": "shell",
+            "environment_vars": [
+                "SERVER_VERSION={{user `server_version`}}"
+            ],
+            "inline": [
+                "echo \"Installing Aerospike Server $SERVER_VERSION\"",
+                "wget -O aerospike.tar.gz https://www.aerospike.com/enterprise/download/server/$SERVER_VERSION/artifact/el7 -q",
+                "tar -xvf aerospike.tar.gz",
+                "sudo rpm -i aerospike-server-*/aerospike-server-*.rpm",
+                "sudo rpm -i aerospike-server-*/aerospike-tools-*.rpm"
+            ]
+        },
+        {
+            "only": ["benchmark-client"],
+            "type": "shell",
+            "environment_vars": [
+                "CLIENT_VERSION={{user `client_version`}}",
+                "TOOLS_VERSION={{user `tools_version`}}"
+            ],
+            "inline": [
+                "echo \"Installing Aerospike Java Client $CLIENT_VERSION\"",
+                "sudo yum install maven -y",
+                "wget -O client.tar.gz https://github.com/aerospike/aerospike-client-java/archive/$CLIENT_VERSION.tar.gz -q",
+                "tar -xvf client.tar.gz",
+                "mv aerospike-client-java-* aerospike-client-java",
+                "mvn -f aerospike-client-java/benchmarks/pom.xml package",
+                "echo \"Installing Aerospike Tools $TOOLS_VERSION\"",
+                "wget -O aerospike-tools.tar.gz https://www.aerospike.com/download/tools/$TOOLS_VERSION/artifact/el7 -q",
+                "tar -xvf aerospike-tools.tar.gz",
+                "sudo rpm -i aerospike-tools-*/aerospike-tools-*.rpm"
+            ]
+        }
+    ]
+}
