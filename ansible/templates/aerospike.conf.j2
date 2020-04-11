@@ -67,6 +67,10 @@ network {
 {% else %}
         port 3001
 {% endif %}
+
+        channel-rw-fds {{ channel_rw_fds }}
+        channel-rw-recv-threads {{ channel_rw_recv_threads }}
+        send-threads {{ send_threads }}
     }
 }
 

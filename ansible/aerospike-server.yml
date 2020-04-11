@@ -1,10 +1,9 @@
 ---
 - hosts: server_instance
-  #remote_user: ec2-user
   vars:
-    service_tls: true
+    service_tls: false
     fabric_tls: false
-    heartbeat_tls: true
+    heartbeat_tls: false
     tls_name: aerospike.server
     tls_authenticate_client: "false"
     ca_file: /etc/pki/tls/certs/aerospike.ca.crt
@@ -17,6 +16,9 @@
     memory_size: 2G
     device: /dev/nvme1n1
     write_block_size: 128K
+    channel_rw_fds: 8 # default 8
+    channel_rw_recv_threads: 8 # default 16
+    send_threads: 8 # default 8
     logging_contexts:
       - context: any
         level: info
