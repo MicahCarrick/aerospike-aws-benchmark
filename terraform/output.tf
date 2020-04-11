@@ -1,7 +1,7 @@
 output "aerospike_nodes" {
     value = {
         for instance in aws_instance.aerospike_server:
-        instance.availability_zone => "${instance.public_ip} (${instance.private_ip})"
+        "${instance.id} ${instance.availability_zone}" => "${instance.public_ip} (${instance.private_ip})"
     }
 }
 
@@ -9,6 +9,6 @@ output "aerospike_nodes" {
 output "client_nodes" {
     value = {
         for instance in aws_instance.benchmark_client:
-        instance.availability_zone => "${instance.public_ip} (${instance.private_ip})"
+        "${instance.id} ${instance.availability_zone}" => "${instance.public_ip} (${instance.private_ip})"
     }
 }

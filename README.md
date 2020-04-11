@@ -34,7 +34,7 @@ using variables defined in a `.tfvars` file:
 
 ```
 cd terraform
-terraform apply -var-file=clusters/benchmark-2AZ.tfvars -var='key_name=micahcarrick'
+terraform apply -var-file=clusters/benchmark-2AZ-amzn2.tfvars -var='key_name=micahcarrick'
 ```
 
 ### Configure Instances
@@ -56,7 +56,7 @@ cp /path/to/features.conf files/
 SSH into server instance and tail logs:
 
 ```
-ssh ec2_user@[aerospike instance PUBLIC IP]
+ssh ec2-user@[aerospike instance PUBLIC IP]
 journalctl -u aerospike -f
 ```
 
@@ -64,21 +64,21 @@ From the `ansible/` directory, run `ansible-playbook` to configure the Aerospike
 server node(s):
 
 ```
-ansible-playbook -i inventory/aws_ec2.yml aerospike-server.yml
+ansible-playbook -i inventory/aws_ec2.yml aerospike-server.yml -u ec2-user
 ```
 
 From the `ansible/` directory, run `ansible-playbook` to configure the Benchmark
 client node(s):
 
 ```
-ansible-playbook -i inventory/aws_ec2.yml benchmark-client.yml
+ansible-playbook -i inventory/aws_ec2.yml benchmark-client.yml -u ec2-user
 ```
 
 SSH into client instance and run benchmarks from the 
 `aerospike-client-java/benchmarks` directory:
 
 ```
-ssh ec2_user@[client instance PUBLIC IP]
+ssh ec2-user@[client instance PUBLIC IP]
 cd aerospike-client-java/benchmarks
 
 java -jar target/aerospike-benchmarks-*-jar-with-dependencies.jar \
@@ -110,7 +110,7 @@ SSH into client instance and run benchmarks from the
 `aerospike-client-java/benchmarks` directory:
 
 ```
-ssh ec2_user@[client instance PUBLIC IP]
+ssh ec2-user@[client instance PUBLIC IP]
 cd aerospike-client-java/benchmarks
 ```
 

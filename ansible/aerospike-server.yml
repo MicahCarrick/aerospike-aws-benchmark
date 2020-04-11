@@ -1,16 +1,16 @@
 ---
 - hosts: server_instance
-  remote_user: ec2-user
+  #remote_user: ec2-user
   vars:
-    service_tls: false
+    service_tls: true
     fabric_tls: false
-    heartbeat_tls: false
+    heartbeat_tls: true
     tls_name: aerospike.server
-    tls_authenticate_client: aerospike.client
+    tls_authenticate_client: "false"
     ca_file: /etc/pki/tls/certs/aerospike.ca.crt
     cert_file: /etc/pki/tls/certs/aerospike.server_RSA.crt
     key_file: /etc/pki/tls/private/aerospike.server_RSA.key
-    cipher_suite: ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:AES256-GCM-SHA384:AES128-GCM-SHA256
+    cipher_suite: AES256-GCM-SHA384
     namespace: test
     replication_factor: 2
     storage_engine: memory
@@ -49,19 +49,19 @@
       mode: '0644'
     tags:
       - tls
-  - name: upload ECDSA server certificate
+  - name: upload ECDH server certificate
     become: yes
     copy:
-      src: files/aerospike.server_ECDSA.crt
-      dest: /etc/pki/tls/certs/aerospike.server_ECDSA.crt
+      src: files/aerospike.server_ECDH.crt
+      dest: /etc/pki/tls/certs/aerospike.server_ECDH.crt
       mode: '0644'
     tags:
       - tls
-  - name: upload ECDSA server private key
+  - name: upload ECDH server private key
     become: yes
     copy:
-      src: files/aerospike.server_ECDSA.key
-      dest: /etc/pki/tls/private/aerospike.server_ECDSA.key
+      src: files/aerospike.server_ECDH.key
+      dest: /etc/pki/tls/private/aerospike.server_ECDH.key
       mode: '0644'
     tags:
       - tls

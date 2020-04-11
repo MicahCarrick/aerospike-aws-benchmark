@@ -7,26 +7,44 @@
     },
     "builders": [
         {
-            "name": "aerospike-server",
+            "name": "aerospike-server-amzn2",
             "type": "amazon-ebs",
             "region": "{{user `region`}}",
             "ami_groups": "all",
             "source_ami_filter": {
                 "filters": {
-                "virtualization-type": "hvm",
-                "name": "amzn2-ami-hvm-*-x86_64-gp2",
-                "root-device-type": "ebs"
+                    "virtualization-type": "hvm",
+                    "name": "amzn2-ami-hvm-*-x86_64-gp2",
+                    "root-device-type": "ebs"
                 },
                 "owners": ["137112412989"],
                 "most_recent": true
             },
             "instance_type": "t2.small",
             "ssh_username": "ec2-user",
-            "ami_name": "aerospike-benchmark-server-{{user `server_version`}}-{{ timestamp }}",
+            "ami_name": "aerospike-benchmark-server-{{user `server_version`}}-amzn2-{{ timestamp }}",
             "ami_description": "Aerospike Server Enterprise {{user `server_version`}}"
         },
         {
-            "name": "benchmark-client",
+            "name": "aerospike-server-centos7",
+            "type": "amazon-ebs",
+            "region": "{{user `region`}}",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "CentOS Linux 7 x86_64 HVM EBS ENA*",
+                    "root-device-type": "ebs"
+                },
+                "owners": ["679593333241"],
+                "most_recent": true
+            },
+            "instance_type": "t2.small",
+            "ssh_username": "centos",
+            "ami_name": "aerospike-benchmark-server-{{user `server_version`}}-centos7-{{ timestamp }}",
+            "ami_description": "Aerospike Server Enterprise {{user `server_version`}}"
+        },
+        {
+            "name": "benchmark-client-amzn2",
             "type": "amazon-ebs",
             "region": "{{user `region`}}",
             "ami_groups": "all",
@@ -41,13 +59,39 @@
             },
             "instance_type": "t2.small",
             "ssh_username": "ec2-user",
-            "ami_name": "aerospike-benchmark-client-{{user `client_version`}}-{{ timestamp }}",
+            "ami_name": "aerospike-benchmark-client-{{user `client_version`}}-amzn2-{{ timestamp }}",
+            "ami_description": "Aerospike Java Client {{user `client_version`}}"
+        },
+        {
+            "name": "benchmark-client-centos7",
+            "type": "amazon-ebs",
+            "region": "{{user `region`}}",
+            "source_ami_filter": {
+                "filters": {
+                    "virtualization-type": "hvm",
+                    "name": "CentOS Linux 7 x86_64 HVM EBS ENA*",
+                    "root-device-type": "ebs"
+                },
+                "owners": ["679593333241"],
+                "most_recent": true
+            },
+            "instance_type": "t2.small",
+            "ssh_username": "centos",
+            "ami_name": "aerospike-benchmark-client-{{user `client_version`}}-centos7-{{ timestamp }}",
             "ami_description": "Aerospike Java Client {{user `client_version`}}"
         }
     ],
     "provisioners": [
         {
-            "pause_before": "15s",
+            "pause_before": "10s",
+            "only": ["aerospike-server-centos7", "benchmark-client-centos7"],
+            "type": "shell",
+            "inline": [
+                "sudo yum install epel-release wget -y"
+            ]
+        },
+        {
+            "pause_before": "10s",
             "type": "shell",
             "inline": [
                 "echo 'Updating system'",
@@ -64,8 +108,7 @@
             "pause_after": "15s"
         },
         {
-            
-            "only": ["aerospike-server"],
+            "only": ["aerospike-server-amzn2", "aerospike-server-centos7"],
             "type": "shell",
             "environment_vars": [
                 "SERVER_VERSION={{user `server_version`}}"
@@ -79,7 +122,7 @@
             ]
         },
         {
-            "only": ["benchmark-client"],
+            "only": ["benchmark-client-amzn2", "benchmark-client-centos7"],
             "type": "shell",
             "environment_vars": [
                 "CLIENT_VERSION={{user `client_version`}}",

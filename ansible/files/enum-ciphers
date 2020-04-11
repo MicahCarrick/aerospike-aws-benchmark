@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+echo "Usage:   enum-ciphers [cipher-string] [host:port]"
+echo "Example: enum-ciphers ALL 10.0.0.1:4000"
+
+for CIPHER in $(openssl ciphers $1 | tr ':' ' '); do
+    openssl s_client -tls1_2 -cipher $CIPHER \
+    -connect $2 < /dev/null 2>/dev/null | \
+    grep "Cipher is" | \
+    grep -o "$CIPHER"
+done

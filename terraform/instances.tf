@@ -6,7 +6,7 @@ data "aws_ami" "benchmark_client_image" {
 
     filter {
         name   = "name"
-        values = ["aerospike-benchmark-client-*"]
+        values = ["${var.client_ami_name}"]
     }
 }
 
@@ -17,7 +17,7 @@ data "aws_ami" "aerospike_server_image" {
 
     filter {
         name   = "name"
-        values = ["aerospike-benchmark-server-*"]
+        values = ["${var.server_ami_name}"]
     }
 }
 

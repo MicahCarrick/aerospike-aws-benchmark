@@ -48,6 +48,16 @@ variable "ami_owner" {
     default = "696609415687"
 }
 
+variable "client_ami_name" {
+    type    = "string"
+    default = "aerospike-benchmark-client-*-amzn2-*"
+}
+
+variable "server_ami_name" {
+    type    = "string"
+    default = "aerospike-benchmark-server-*-amzn2-*"
+}
+
 # NAT Instance Type
 #
 # The EC2 instance type to use for the NAT instances if 'nat_type' = 'instance'.
