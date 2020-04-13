@@ -28,21 +28,21 @@
   - name: remove old CA certificate Java TrustStore
     become: no
     file:
-      path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.ca.jks
+      path: /home/{{ ansible_user }}/aerospike.ca.jks
       state: absent
   - name: add CA certificate to Java TrustStore
     become: no
     java_cert:
       cert_path: /etc/pki/tls/certs/aerospike.ca.crt
       cert_alias: aerospike.ca
-      keystore_path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.ca.jks
+      keystore_path: /home/{{ ansible_user }}/aerospike.ca.jks
       keystore_pass: changeit
       keystore_create: yes
       state: present
   - name: remove old RSA client certificate Java KeyStore
     become: no
     file:
-      path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.client_RSA.jks
+      path: /home/{{ ansible_user }}/aerospike.client_RSA.jks
       state: absent
   - name: add RSA client certificate to Java KeyStore
     become: no
@@ -51,14 +51,14 @@
       pkcs12_alias: aerospike.client
       pkcs12_password: changeit
       cert_alias: aerospike.client
-      keystore_path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.client_RSA.jks
+      keystore_path: /home/{{ ansible_user }}/aerospike.client_RSA.jks
       keystore_pass: changeit
       keystore_create: yes
       state: present
   - name: remove ECDH client certificate Java KeyStore
     become: no
     file:
-      path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.client_ECDH.jks
+      path: /home/{{ ansible_user }}/aerospike.client_ECDH.jks
       state: absent
   - name: add ECDH client certificate to Java KeyStore
     become: no
@@ -67,7 +67,7 @@
       pkcs12_alias: aerospike.client
       pkcs12_password: changeit
       cert_alias: aerospike.client
-      keystore_path: /home/{{ ansible_user }}/aerospike-client-java/benchmarks/aerospike.client_ECDH.jks
+      keystore_path: /home/{{ ansible_user }}/aerospike.client_ECDH.jks
       keystore_pass: changeit
       keystore_create: yes
       state: present

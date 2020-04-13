@@ -118,7 +118,8 @@
                 "wget -O aerospike.tar.gz https://www.aerospike.com/enterprise/download/server/$SERVER_VERSION/artifact/el7 -q",
                 "tar -xvf aerospike.tar.gz",
                 "sudo rpm -i aerospike-server-*/aerospike-server-*.rpm",
-                "sudo rpm -i aerospike-server-*/aerospike-tools-*.rpm"
+                "sudo rpm -i aerospike-server-*/aerospike-tools-*.rpm",
+                "sudo yum install sysstat -y"
             ]
         },
         {
@@ -135,6 +136,7 @@
                 "tar -xvf client.tar.gz",
                 "mv aerospike-client-java-* aerospike-client-java",
                 "mvn -f aerospike-client-java/benchmarks/pom.xml package",
+                "ln -s aerospike-client-java/benchmarks/target/aerospike-benchmarks-4.4.10-jar-with-dependencies.jar aerospike-benchmarks.jar",
                 "echo \"Installing Aerospike Tools $TOOLS_VERSION\"",
                 "wget -O aerospike-tools.tar.gz https://www.aerospike.com/download/tools/$TOOLS_VERSION/artifact/el7 -q",
                 "tar -xvf aerospike-tools.tar.gz",

@@ -1,10 +1,6 @@
 service {
-    cluster-name aws-benchmark
-{% for item in groups['server_instance'] %}
-{% if item == inventory_hostname %}
-    node-id a{{ loop.index }}
-{% endif %}
-{% endfor %}
+    cluster-name {{ cluster_name }}
+    node-id {{ node_id }}
 }
 
 logging {
@@ -80,8 +76,16 @@ namespace {{ namespace}} {
 
 {% if storage_engine == 'device' %}
     storage-engine {{ storage_engine }} {
-        device {{ device }}
         write-block-size {{ write_block_size }}
+
+{% for device in devices %}
+        device {{ device }}
+{% endfor %}
+
+{% if encryption == 'aes-128' or encryption == 'aes-256' %}
+        encryption-key-file {{ encryption_key_file }}
+        encryption {{ encryption }}
+{% endif %}
     }
 {% else %}
     storage-engine {{ storage_engine }}

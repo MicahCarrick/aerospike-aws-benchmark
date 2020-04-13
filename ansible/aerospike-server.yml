@@ -1,9 +1,11 @@
 ---
 - hosts: server_instance
   vars:
-    service_tls: false
-    fabric_tls: false
-    heartbeat_tls: false
+    cluster_name: benchmark
+    node_id: "a{{ play_hosts.index(inventory_hostname) }}"
+    service_tls: true
+    fabric_tls: true
+    heartbeat_tls: true
     tls_name: aerospike.server
     tls_authenticate_client: "false"
     ca_file: /etc/pki/tls/certs/aerospike.ca.crt
@@ -12,10 +14,12 @@
     cipher_suite: AES256-GCM-SHA384
     namespace: test
     replication_factor: 2
-    storage_engine: memory
-    memory_size: 2G
-    device: /dev/nvme1n1
+    storage_engine: device
+    memory_size: 64G
+    devices: ['/dev/nvme1n1', '/dev/nvme2n1']
     write_block_size: 128K
+    encryption: aes-256
+    encryption_key_file: /etc/aerospike/private/ns_test.key
     channel_rw_fds: 8 # default 8
     channel_rw_recv_threads: 8 # default 16
     send_threads: 8 # default 8
@@ -26,7 +30,32 @@
         level: debug
       - context: socket
         level: info
+      - context: security
+        level: debug
+      - context: namespace
+        level: debug
   tasks:
+  - name: set hostname
+    become: yes
+    hostname:
+      name: "{{ cluster_name }}.{{ node_id }}"
+    tags:
+      - config
+  - name: create private aerospike directory
+    become: yes
+    file:
+      path: /etc/aerospike/private
+      state: directory
+      mode: '0700'
+  - name: copy encryption key
+    become: yes
+    copy:
+      src: files/ns_test.key
+      dest: /etc/aerospike/private/ns_test.key
+      mode: '0600'
+    tags: 
+      - config
+      - ear
   - name: upload CA certificate
     become: yes
     copy:
